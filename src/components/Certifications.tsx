@@ -6,28 +6,28 @@ const certs = [
   {
     title: "AWS Cloud Practitioner Essentials",
     issuer: "Amazon Web Services (AWS)",
-    image: "/src/certificates/AWS Cloud Practitionar Essential.png",
+    image: "/certificates/AWS Cloud Practitionar Essential.png",
     description: "Covered core cloud concepts, AWS services, security, architecture, pricing, and support models to build a solid foundational cloud knowledge.",
     link: "#"
   },
   {
     title: "AWS Networking Basics",
     issuer: "Amazon Web Services (AWS)",
-    image: "/src/certificates/AWS Networking Basics.png",
+    image: "/certificates/AWS Networking Basics.png",
     description: "Explored foundational cloud networking concepts including VPCs, subnets, routing, internet gateways, and security groups to manage cloud traffic.",
     link: "#"
   },
   {
     title: "AWS Well-Architected Foundation",
     issuer: "Amazon Web Services (AWS)",
-    image: "/src/certificates/AWS Well Architectured Foundation.png",
+    image: "/certificates/AWS Well Architectured Foundation.png",
     description: "Learned the six pillars of the AWS Well-Architected Framework: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability.",
     link: "#"
   },
   {
     title: "Computer Literacy",
     issuer: "Vocational & Technical Training",
-    image: "/src/certificates/computerlitercy.png",
+    image: "/certificates/computerlitercy.png",
     description: "Comprehensive training on Microsoft Office (Word, Excel, Access, PowerPoint), along with fundamental knowledge in computer hardware assembly and basic networking.",
     link: "#"
   }
@@ -44,7 +44,6 @@ export function Certifications() {
           <div className="w-12 h-1 bg-primary rounded-full"></div>
         </div>
 
-        {/* Certifications Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {certs.map((cert, idx) => (
             <motion.div
@@ -62,14 +61,12 @@ export function Certifications() {
               onClick={() => setSelectedImg(cert.image)}
               className="group flex flex-col bg-card border border-border/80 rounded-2xl overflow-hidden cursor-pointer select-none transition-colors duration-300 will-change-transform"
             >
-              {/* Certificate Image Thumbnail acting as Icon */}
               <div className="relative aspect-video w-full overflow-hidden bg-muted border-b border-border/50">
                 <img 
                   src={cert.image} 
                   alt={cert.title} 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
-                    // Fallback if image path fails
                     (e.target as HTMLElement).style.display = 'none';
                   }}
                 />
@@ -80,7 +77,6 @@ export function Certifications() {
                 </div>
               </div>
 
-              {/* Content Body */}
               <div className="p-5 flex-1 flex flex-col">
                 <h3 className="font-bold text-foreground text-base mb-1 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
                   {cert.title}
@@ -92,9 +88,8 @@ export function Certifications() {
                   {cert.description}
                 </p>
                 
-                {/* Link */}
                 <div 
-                  onClick={(e) => e.stopPropagation()} // Prevents opening the modal when clicking the link
+                  onClick={(e) => e.stopPropagation()} 
                   className="mt-auto pt-2 border-t border-border/40"
                 >
                   <a 
@@ -112,7 +107,6 @@ export function Certifications() {
         </div>
       </div>
 
-      {/* Lightbox Modal for Maximize Image */}
       <AnimatePresence>
         {selectedImg && (
           <motion.div
@@ -127,10 +121,9 @@ export function Certifications() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the image itself
+              onClick={(e) => e.stopPropagation()} 
               className="relative max-w-4xl w-full max-h-[85vh] bg-card border border-border/50 rounded-2xl overflow-hidden shadow-2xl cursor-default"
             >
-              {/* Close Button */}
               <button
                 onClick={() => setSelectedImg(null)}
                 className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-emerald-600 transition-colors shadow-md"
@@ -139,7 +132,6 @@ export function Certifications() {
                 <X className="w-5 h-5" />
               </button>
 
-              {/* Large Image View */}
               <div className="w-full h-full flex items-center justify-center bg-muted p-2">
                 <img
                   src={selectedImg}
