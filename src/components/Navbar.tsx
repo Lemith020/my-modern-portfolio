@@ -109,8 +109,13 @@ export function Navbar() {
           <div className="flex items-center gap-4 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Open Menu">
-                  <Menu className="h-5 w-5" />
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-11 w-11 rounded-xl border-border bg-card/80 backdrop-blur-sm shadow-sm hover:bg-primary/10 hover:text-primary transition-all duration-300" 
+                  aria-label="Open Menu"
+                >
+                  <Menu className="h-6 w-6 transition-transform" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">

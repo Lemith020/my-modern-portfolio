@@ -79,15 +79,16 @@ export function Hero() {
               </motion.div>
             </div>
 
+            {/* Icons ලොකු කර ඇත (h-12 w-12 සහ Icon එක h-6 w-6) */}
             <div className="flex items-center gap-4 pt-4">
               <motion.div
                 whileHover={{ scale: 1.2, rotate: 12 }}
                 whileTap={{ scale: 0.9, rotate: -8 }}
                 transition={liquidTransition}
               >
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors" asChild>
+                <Button variant="outline" size="icon" className="h-12 w-12 rounded-full border-border bg-card/50 hover:bg-primary/10 hover:text-primary transition-colors shadow-sm" asChild>
                   <a href="https://github.com/Lemith020" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                    <FaGithub className="h-5 w-5" />
+                    <FaGithub className="h-6 w-6" />
                   </a>
                 </Button>
               </motion.div>
@@ -97,9 +98,9 @@ export function Hero() {
                 whileTap={{ scale: 0.9, rotate: 8 }}
                 transition={liquidTransition}
               >
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors" asChild>
+                <Button variant="outline" size="icon" className="h-12 w-12 rounded-full border-border bg-card/50 hover:bg-primary/10 hover:text-primary transition-colors shadow-sm" asChild>
                   <a href="https://www.linkedin.com/in/lemith-nanditha-b0a738381" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                    <FaLinkedin className="h-5 w-5" />
+                    <FaLinkedin className="h-6 w-6" />
                   </a>
                 </Button>
               </motion.div>
