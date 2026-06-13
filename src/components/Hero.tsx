@@ -2,8 +2,16 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Download } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import profileImg from "../images/profile.png";
 
-const avatarPlaceholder = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&h=256&fit=crop";
+const avatarPlaceholder = profileImg;
+
+const liquidTransition = {
+  type: "spring",
+  stiffness: 400,
+  damping: 10,
+  mass: 0.8
+};
 
 export function Hero() {
   return (
@@ -45,30 +53,56 @@ export function Hero() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Button size="lg" className="h-12 px-8 font-medium group" onClick={() => {
-                const element = document.querySelector("#contact");
-                if (element) element.scrollIntoView({ behavior: "smooth" });
-              }}>
-                Contact Me
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 font-medium">
-                <Download className="mr-2 h-4 w-4" />
-                Download CV
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={liquidTransition}
+              >
+                <Button size="lg" className="h-12 px-8 font-medium group" onClick={() => {
+                  const element = document.querySelector("#contact");
+                  if (element) element.scrollIntoView({ behavior: "smooth" });
+                }}>
+                  Contact Me
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={liquidTransition}
+              >
+                <Button size="lg" variant="outline" className="h-12 px-8 font-medium">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download CV
+                </Button>
+              </motion.div>
             </div>
 
             <div className="flex items-center gap-4 pt-4">
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors" asChild>
-                <a href="#github" aria-label="GitHub">
-                  <FaGithub className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors" asChild>
-                <a href="#linkedin" aria-label="LinkedIn">
-                  <FaLinkedin className="h-5 w-5" />
-                </a>
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.2, rotate: 12 }}
+                whileTap={{ scale: 0.9, rotate: -8 }}
+                transition={liquidTransition}
+              >
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors" asChild>
+                  <a href="https://github.com/Lemith020" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <FaGithub className="h-5 w-5" />
+                  </a>
+                </Button>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.2, rotate: -12 }}
+                whileTap={{ scale: 0.9, rotate: 8 }}
+                transition={liquidTransition}
+              >
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors" asChild>
+                  <a href="https://www.linkedin.com/in/lemith-nanditha-b0a738381" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <FaLinkedin className="h-5 w-5" />
+                  </a>
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
 
@@ -78,14 +112,26 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="flex justify-center lg:justify-end"
           >
-            <div className="relative w-72 h-72 sm:w-96 sm:h-96">
+            <motion.div 
+              className="relative w-72 h-72 sm:w-96 sm:h-96 cursor-pointer"
+              whileHover={{ 
+                scale: 1.03,
+                borderRadius: ["24px", "40px", "24px"],
+              }}
+              transition={{ 
+                duration: 0.5,
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+            >
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse-slow"></div>
               <img 
                 src={avatarPlaceholder} 
                 alt="Lemith - Avatar" 
-                className="relative z-10 w-full h-full object-cover rounded-3xl shadow-2xl ring-1 ring-border/50 bg-card"
+                className="relative z-10 w-full h-full object-cover rounded-3xl shadow-2xl ring-1 ring-border/50 bg-card transition-all duration-500 hover:rounded-[2rem]"
               />
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

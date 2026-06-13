@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
-import { Moon, Sun, Menu, X } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
+import { motion } from "framer-motion";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -16,8 +15,8 @@ const navLinks = [
 ];
 
 export function Navbar() {
-  const { theme, setTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("#home");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +24,31 @@ export function Navbar() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observers = navLinks.map((link) => {
+      const element = document.querySelector(link.href);
+      if (!element) return null;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setActiveSection(link.href);
+          }
+        },
+        { rootMargin: "-50% 0px -50% 0px" }
+      );
+
+      observer.observe(element);
+      return { observer, element };
+    });
+
+    return () => {
+      observers.forEach((obs) => {
+        if (obs) obs.observer.unobserve(obs.element);
+      });
+    };
   }, []);
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -56,39 +80,33 @@ export function Navbar() {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleScrollTo(e, link.href)}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-            >
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            </Button>
+          <nav className="hidden md:flex items-center gap-1 relative bg-muted/40 p-1 rounded-full border border-border/40">
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.href;
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleScrollTo(e, link.href)}
+                  className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors duration-300 select-none ${
+                    isActive ? "text-primary-foreground z-10" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeNavBackground"
+                      className="absolute inset-0 bg-primary rounded-full -z-10"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  {link.name}
+                </a>
+              );
+            })}
           </nav>
 
           {/* Mobile Nav */}
           <div className="flex items-center gap-4 md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-            >
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            </Button>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open Menu">
@@ -96,13 +114,17 @@ export function Navbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
-                <nav className="flex flex-col gap-6 mt-8">
+                <nav className="flex flex-col gap-4 mt-8">
                   {navLinks.map((link) => (
                     <a
                       key={link.name}
                       href={link.href}
                       onClick={(e) => handleScrollTo(e, link.href)}
-                      className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                      className={`text-lg font-medium py-2 px-4 rounded-xl transition-colors ${
+                        activeSection === link.href
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground hover:bg-muted"
+                      }`}
                     >
                       {link.name}
                     </a>

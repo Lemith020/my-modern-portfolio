@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   SiJavascript, SiPython, SiReact, SiVite, SiBootstrap, SiTailwindcss, 
   SiNodedotjs, SiExpress, SiMongodb, SiMysql, SiNumpy, SiPandas, SiScikitlearn, 
-  SiTensorflow, SiPytorch, SiGit, SiGithub, SiPostman, SiFigma
+  SiTensorflow, SiPytorch, SiGit, SiGithub, SiPostman, SiFigma, SiPhp, SiC
 } from "react-icons/si";
 import { FaJava } from "react-icons/fa";
 import { TbBrandVscode, TbDatabase } from "react-icons/tb";
@@ -14,19 +14,18 @@ const skillCategories = [
     title: "Programming Languages",
     icon: <Code className="h-5 w-5" />,
     skills: [
-      { name: "Java", icon: <FaJava /> },
-      { name: "JavaScript", icon: <SiJavascript /> },
-      { name: "Python", icon: <SiPython /> },
-      { name: "C#", icon: <Code /> },
-      { name: "SQL", icon: <TbDatabase /> },
+      { name: "Java", icon: <FaJava />, color: "hover:text-[#007396] hover:border-[#007396]/30 hover:bg-[#007396]/5" },
+      { name: "C", icon: <SiC />, color: "hover:text-[#A8B9CC] hover:border-[#A8B9CC]/30 hover:bg-[#A8B9CC]/5" },
+      { name: "Python", icon: <SiPython />, color: "hover:text-[#3776AB] hover:border-[#3776AB]/30 hover:bg-[#3776AB]/5" },
+      { name: "JavaScript", icon: <SiJavascript />, color: "hover:text-[#F7DF1E] hover:border-[#F7DF1E]/30 hover:bg-[#F7DF1E]/5" },
+      { name: "PHP", icon: <SiPhp />, color: "hover:text-[#777BB4] hover:border-[#777BB4]/30 hover:bg-[#777BB4]/5" },
+      { name: "SQL", icon: <TbDatabase />, color: "hover:text-[#00758F] hover:border-[#00758F]/30 hover:bg-[#00758F]/5" },
     ]
   },
   {
     title: "Frontend",
     icon: <Layout className="h-5 w-5" />,
     skills: [
-      { name: "HTML/CSS", icon: <Code /> },
-      { name: "JavaScript", icon: <SiJavascript /> },
       { name: "React", icon: <SiReact /> },
       { name: "Vite", icon: <SiVite /> },
       { name: "Bootstrap", icon: <SiBootstrap /> },
@@ -92,18 +91,34 @@ const containerVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
+    transition: { staggerChildren: 0.08 }
   }
 };
 
-const itemVariants = {
+const cardVariants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  hover: {
+    scale: 1.03,
+    backgroundColor: "rgba(16, 185, 129, 0.04)",
+    borderColor: "rgba(16, 185, 129, 0.4)",
+    boxShadow: "0 15px 30px -10px rgb(16 185 129 / 0.08)",
+    transition: { type: "spring", stiffness: 300, damping: 20 }
+  },
+  tap: { scale: 0.99 }
+};
+
+const badgeVariants = {
+  initial: { scale: 1 },
+  hover: { 
+    scale: 1.05,
+    transition: { type: "spring", stiffness: 400, damping: 10 }
+  }
 };
 
 export function Skills() {
   return (
-    <section id="skills" className="py-24">
+    <section id="skills" className="py-24 bg-emerald-50/10 dark:bg-emerald-950/5 transition-colors duration-500">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         <div className="mb-12">
           <h2 className="text-3xl font-bold mb-2">Skills & Technologies</h2>
@@ -120,25 +135,42 @@ export function Skills() {
           {skillCategories.map((category, i) => (
             <motion.div 
               key={i} 
-              variants={itemVariants}
-              className="p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow"
+              variants={cardVariants}
+              whileHover="hover"
+              whileTap="tap"
+              className="p-6 rounded-2xl bg-card border border-border/80 shadow-sm cursor-pointer select-none transition-colors duration-300 group will-change-transform"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors duration-300">
                   {category.icon}
                 </div>
-                <h3 className="font-semibold text-lg">{category.title}</h3>
+                <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                  {category.title}
+                </h3>
               </div>
+              
               <div className="flex flex-wrap gap-2">
                 {category.skills.map((skill, j) => (
-                  <Badge 
-                    key={j} 
-                    variant="secondary" 
-                    className="flex items-center gap-1.5 py-1.5 px-3 bg-secondary/50 hover:bg-secondary transition-colors"
+                  <motion.div
+                    key={j}
+                    variants={badgeVariants}
+                    initial="initial"
+                    whileHover="hover"
                   >
-                    {skill.icon && <span className="text-muted-foreground">{skill.icon}</span>}
-                    {skill.name}
-                  </Badge>
+                    <Badge 
+                      variant="secondary" 
+                      className={`flex items-center gap-1.5 py-1.5 px-3 bg-secondary/40 border border-transparent transition-all duration-300 ${
+                        skill.color ? skill.color : "hover:text-emerald-500 hover:border-emerald-500/30 hover:bg-emerald-500/5"
+                      }`}
+                    >
+                      {skill.icon && (
+                        <span className="text-muted-foreground transition-colors duration-300 group-hover:text-inherit">
+                          {skill.icon}
+                        </span>
+                      )}
+                      {skill.name}
+                    </Badge>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
