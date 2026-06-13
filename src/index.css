@@ -4,7 +4,7 @@
 
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -136,60 +136,6 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-.dark {
-  --button-outline: rgba(255, 255, 255, .10);
-  --badge-outline: rgba(255, 255, 255, .05);
-  --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255, 255, 255, .04);
-  --elevate-2: rgba(255, 255, 255, .09);
-
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --card: 240 10% 6%;
-  --card-foreground: 0 0% 98%;
-  --card-border: 240 3.7% 15.9%;
-  --sidebar: 240 10% 3.9%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 3.7% 15.9%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-ring: 240 4.9% 83.9%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --popover-border: 240 3.7% 15.9%;
-
-  --primary: 142 70% 45%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 142 70% 15%;
-  --accent-foreground: 142 70% 85%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --input: 240 3.7% 15.9%;
-  --ring: 142 70% 45%;
-
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
-
-  --shadow-2xs: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00), 0px 1px 2px -1px hsl(240 3.7% 15.9% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00), 0px 1px 2px -1px hsl(240 3.7% 15.9% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00), 0px 2px 4px -1px hsl(240 3.7% 15.9% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00), 0px 4px 6px -1px hsl(240 3.7% 15.9% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00), 0px 8px 10px -1px hsl(240 3.7% 15.9% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(240 3.7% 15.9% / 0.00);
-}
 
 @layer base {
   * {
