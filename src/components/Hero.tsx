@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { CV_URL, CV_FILENAME, fetchCv } from "@/lib/cv";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Download } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
@@ -7,13 +9,43 @@ import profileImg from "../images/profile.png";
 const avatarPlaceholder = profileImg;
 
 const liquidTransition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 400,
   damping: 10,
   mass: 0.8
 };
 
 export function Hero() {
+  const [isDownloadingCv, setIsDownloadingCv] = useState(false);
+
+  async function handleDownloadCv() {
+    if (isDownloadingCv) return;
+    setIsDownloadingCv(true);
+    try {
+      const file = await fetchCv(CV_URL);
+      if (!file) {
+        window.alert("CV not updated yet.");
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = CV_FILENAME;
+      document.body.appendChild(link);
+      try {
+        link.click();
+      } finally {
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      }
+    } catch {
+      window.alert("Unable to download the CV. Please try again shortly.");
+    } finally {
+      setIsDownloadingCv(false);
+    }
+  }
+
   return (
     <section id="home" className="min-h-[100dvh] pt-20 flex items-center relative overflow-hidden">
       <div className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.02]" 
@@ -72,9 +104,9 @@ export function Hero() {
                 whileTap={{ scale: 0.95 }}
                 transition={liquidTransition}
               >
-                <Button size="lg" variant="outline" className="h-12 px-8 font-medium">
+                <Button size="lg" variant="outline" className="h-12 px-8 font-medium" onClick={() => void handleDownloadCv()} disabled={isDownloadingCv} aria-busy={isDownloadingCv}>
                   <Download className="mr-2 h-4 w-4" />
-                  Download CV
+                  {isDownloadingCv ? "Downloading..." : "Download CV"}
                 </Button>
               </motion.div>
             </div>
