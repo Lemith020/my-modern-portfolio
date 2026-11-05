@@ -1,0 +1,25 @@
+.contact-location-label { display: flex; align-items: center; gap: 7px; color: hsl(var(--muted-foreground)); font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+.contact-location-label svg { color: hsl(var(--primary)); }
+.location-postcard { position: relative; display: block; overflow: hidden; border: 1px solid hsl(var(--primary) / .22); border-radius: 19px; color: hsl(var(--foreground)); background: linear-gradient(150deg, hsl(var(--primary) / .1), transparent 65%), hsl(var(--card)); text-decoration: none; transition: border-color .25s, box-shadow .25s; }
+.location-postcard::before { position: absolute; content: ""; inset: 0; background-image: radial-gradient(hsl(var(--primary) / .17) .7px, transparent .7px); background-size: 15px 15px; pointer-events: none; }
+.location-postcard-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 17px 0; color: hsl(var(--primary)); }
+.location-postcard-top > span { display: flex; align-items: center; gap: 7px; font-family: var(--app-font-mono); font-size: 8px; font-weight: 600; letter-spacing: .07em; line-height: 1.6; }
+.location-status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.location-artwork { position: relative; height: 125px; display: grid; place-items: center; }
+.location-globe { position: absolute; width: min(240px, 90%); height: 120px; color: hsl(var(--primary)); stroke: currentColor; stroke-width: .8px; opacity: .22; transform: rotate(-12deg); }
+.location-orbit { position: absolute; border: 1px solid hsl(var(--primary) / .12); border-radius: 50%; }
+.location-orbit-outer { width: 112px; height: 112px; }
+.location-orbit-inner { width: 84px; height: 84px; background: hsl(var(--primary) / .035); }
+.location-pin { position: relative; display: grid; place-items: center; width: 54px; height: 63px; border-radius: 18px; color: #fff; background: linear-gradient(145deg, #34d399, #059669); box-shadow: 0 8px 20px #05966930, inset 0 1px 0 #ffffff55; transform: translateY(-7px) rotate(-6deg); transition: transform .3s; }
+.location-pin svg { width: 33px; height: 33px; }
+.location-pin-shadow { position: absolute; width: 38px; height: 6px; border-radius: 50%; background: hsl(var(--primary) / .15); transform: translateY(37px); filter: blur(2px); }
+.location-spark { position: absolute; width: 5px; height: 5px; border-radius: 2px; background: hsl(var(--primary) / .45); transform: rotate(45deg); }
+.location-spark-one { top: 26px; left: 22%; }
+.location-spark-two { bottom: 28px; right: 20%; width: 3px; height: 3px; }
+.location-postcard-bottom { position: relative; padding: 0 18px 18px; }
+.location-based-label { display: block; color: hsl(var(--muted-foreground)); font-family: var(--app-font-mono); font-size: 8px; letter-spacing: .14em; margin-bottom: 5px; }
+.location-postcard-bottom strong { display: block; font-size: 19px; line-height: 1.35; letter-spacing: -.025em; font-weight: 600; overflow-wrap: anywhere; }
+.location-map-link { display: flex; align-items: center; gap: 6px; color: hsl(var(--primary)); font-size: 10px; font-weight: 600; margin-top: 13px; }
+.location-postcard:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+@media (hover: hover) { .location-postcard:hover { border-color: hsl(var(--primary) / .5); box-shadow: 0 8px 24px hsl(var(--primary) / .07); } .location-postcard:hover .location-pin { transform: translateY(-11px) rotate(0deg); } }
+@media (prefers-reduced-motion: reduce) { .location-postcard, .location-pin { transition: none; } .location-postcard:hover .location-pin { transform: translateY(-7px) rotate(-6deg); } }

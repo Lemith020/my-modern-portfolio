@@ -1,9 +1,11 @@
+import { LocationCard } from "@/components/LocationCard";
+import { contactLocation } from "@/data/location";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { MapPin, Mail, Send, CheckCircle2 } from "lucide-react";
+import { Mail, Send, CheckCircle2 } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
 
@@ -126,15 +128,7 @@ export function Contact() {
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-primary/10 text-primary group-hover:bg-emerald-500/10 group-hover:text-emerald-500 rounded-xl transition-colors duration-300">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground font-medium mb-1">Location</p>
-                    <p className="text-foreground font-medium group-hover:text-foreground/90 transition-colors duration-300">Kelaniya, Sri Lanka</p>
-                  </div>
-                </div>
+                <LocationCard location={contactLocation.label} mapsUrl={contactLocation.mapsUrl} />
               </div>
             </div>
 
