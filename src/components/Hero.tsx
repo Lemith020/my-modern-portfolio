@@ -41,7 +41,7 @@ export function Hero() {
                 Available for opportunities
               </motion.div>
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-foreground mb-4">
-                Hi, I'm <span className="text-primary">Lemith.</span>
+                Hi, I'm <span className="text-primary">Lemith Nanditha.</span>
               </h1>
               <h2 className="text-xl sm:text-2xl font-medium text-muted-foreground mb-6">
                 BSc (Hons) Software Engineering Undergraduate <br className="hidden sm:block" />
@@ -129,7 +129,7 @@ export function Hero() {
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse-slow"></div>
               <img 
                 src={avatarPlaceholder} 
-                alt="Lemith - Avatar" 
+                alt="Lemith Nanditha - Avatar"
                 className="relative z-10 w-full h-full object-cover rounded-3xl shadow-2xl ring-1 ring-border/50 bg-card transition-all duration-500 hover:rounded-[2rem]"
               />
             </motion.div>
