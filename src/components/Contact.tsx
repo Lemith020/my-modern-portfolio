@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Mail, Send, CheckCircle2 } from "lucide-react";
+import { Mail, Send, CheckCircle2, MessageCircle } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
 
@@ -150,7 +150,7 @@ export function Contact() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            className="md:col-span-3 bg-card border border-border p-8 md:p-10 rounded-3xl shadow-sm flex flex-col justify-center min-h-[400px]"
+            className="md:col-span-3 bg-card border border-border p-8 md:p-10 rounded-3xl shadow-sm flex flex-col justify-start min-h-[400px]"
           >
             <AnimatePresence mode="wait">
               {!isSuccess ? (
@@ -161,8 +161,20 @@ export function Contact() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
+                  <header className="mb-7 pb-7 border-b border-border/60">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-[10px] font-semibold tracking-[0.15em] text-emerald-600 mb-4">
+                      <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                      LET'S TALK
+                    </div>
+                    <h3 id="contact-form-heading" className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight mb-3">
+                      Let's Build <span className="text-emerald-600">Something Great.</span>
+                    </h3>
+                    <p id="contact-form-description" className="text-sm leading-relaxed text-muted-foreground max-w-md">
+                      Have an idea, a question, or a project in mind? Let's turn it into something meaningful.
+                    </p>
+                  </header>
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" aria-labelledby="contact-form-heading" aria-describedby="contact-form-description">
                       <div className="grid sm:grid-cols-2 gap-6">
                         <FormField
                           control={form.control}
@@ -225,7 +237,7 @@ export function Contact() {
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  className="flex flex-col items-center justify-center text-center p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl"
+                  className="my-auto flex flex-col items-center justify-center text-center p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl"
                 >
                   <motion.div
                     initial={{ scale: 0 }}
