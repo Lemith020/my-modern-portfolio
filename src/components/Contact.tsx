@@ -128,7 +128,7 @@ export function Contact() {
                   </div>
                 </div>
                 
-                <LocationCard location={contactLocation.label} mapsUrl={contactLocation.mapsUrl} />
+                <LocationCard location={contactLocation.label} mapsUrl={contactLocation.mapsUrl} mapImage={contactLocation.mapImage} mapImageAlt={contactLocation.mapImageAlt} />
               </div>
             </div>
 

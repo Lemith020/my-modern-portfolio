@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { ArrowUpRight, MapPin, Navigation } from "lucide-react";
 import "@/styles/location.css";
 
 type LocationCardProps = {
   location: string;
   mapsUrl: string;
+  mapImage?: string;
+  mapImageAlt?: string;
 };
 
-export function LocationCard({ location, mapsUrl }: LocationCardProps) {
+export function LocationCard({ location, mapsUrl, mapImage, mapImageAlt }: LocationCardProps) {
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const showMapImage = Boolean(mapImage && mapImage !== failedImage);
+
   return (
     <div className="contact-location">
       <div className="contact-location-label"><MapPin size={15} aria-hidden="true" /> Location</div>
@@ -18,7 +24,18 @@ export function LocationCard({ location, mapsUrl }: LocationCardProps) {
         aria-label={`View ${location} on Google Maps (opens in a new tab)`}
       >
         <div className="location-postcard-top"><span><span className="location-status-dot" /> MY CORNER OF THE WORLD</span><ArrowUpRight size={17} aria-hidden="true" /></div>
-        <div className="location-artwork" aria-hidden="true">
+        {showMapImage ? (
+          <div className="location-map-preview">
+            <img
+              src={mapImage}
+              alt={mapImageAlt || `Map of ${location}`}
+              width={732}
+              height={383}
+              loading="lazy"
+              onError={() => setFailedImage(mapImage || null)}
+            />
+          </div>
+        ) : <div className="location-artwork" aria-hidden="true">
           <span className="location-orbit location-orbit-outer" />
           <span className="location-orbit location-orbit-inner" />
           <svg className="location-globe" viewBox="0 0 240 120" fill="none">
@@ -31,7 +48,7 @@ export function LocationCard({ location, mapsUrl }: LocationCardProps) {
           <span className="location-pin"><MapPin strokeWidth={1.6} /></span>
           <span className="location-spark location-spark-one" />
           <span className="location-spark location-spark-two" />
-        </div>
+        </div>}
         <div className="location-postcard-bottom">
           <span className="location-based-label">BASED IN</span>
           <strong>{location}</strong>

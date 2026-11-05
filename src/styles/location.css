@@ -6,6 +6,8 @@
 .location-postcard-top > span { display: flex; align-items: center; gap: 7px; font-family: var(--app-font-mono); font-size: 8px; font-weight: 600; letter-spacing: .07em; line-height: 1.6; }
 .location-status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 .location-artwork { position: relative; height: 125px; display: grid; place-items: center; }
+.location-map-preview { position: relative; overflow: hidden; margin: 14px 14px 18px; border: 1px solid hsl(var(--primary) / .15); border-radius: 12px; background: hsl(var(--muted)); }
+.location-map-preview img { display: block; width: 100%; height: auto; aspect-ratio: 732 / 383; object-fit: contain; }
 .location-globe { position: absolute; width: min(240px, 90%); height: 120px; color: hsl(var(--primary)); stroke: currentColor; stroke-width: .8px; opacity: .22; transform: rotate(-12deg); }
 .location-orbit { position: absolute; border: 1px solid hsl(var(--primary) / .12); border-radius: 50%; }
 .location-orbit-outer { width: 112px; height: 112px; }
