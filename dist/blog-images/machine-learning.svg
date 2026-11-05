@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" fill="none">
+  <defs><pattern id="grid" width="45" height="45" patternUnits="userSpaceOnUse"><path d="M45 0H0V45" stroke="#A4C1AD" stroke-opacity=".3"/></pattern></defs>
+  <path fill="#E0ECE0" d="M0 0h1400v900H0z"/><path fill="url(#grid)" d="M0 0h1400v900H0z"/><circle cx="1310" cy="120" r="320" fill="#CBE0C9"/>
+  <text x="110" y="150" font-family="monospace" font-size="17" letter-spacing="5" fill="#4B7155">A FIRST STEP INTO</text><text x="105" y="250" font-family="Arial,sans-serif" font-size="70" font-weight="700" letter-spacing="-3" fill="#1F4130">Machine Learning.</text>
+  <rect x="110" y="350" width="1180" height="350" rx="28" fill="#FAFCF8" stroke="#B9CDB8"/><path d="M370 520h145m370 0h145" stroke="#6E9973" stroke-width="4" stroke-dasharray="8 8"/>
+  <rect x="180" y="432" width="190" height="175" rx="18" fill="#E4EEE0"/><path d="M215 474h120m-120 24h120m-120 24h120m-120 24h85" stroke="#769A75" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="625" cy="470" r="17" fill="#70A674"/><circle cx="625" cy="565" r="17" fill="#70A674"/><circle cx="720" cy="435" r="17" fill="#305C40"/><circle cx="720" cy="520" r="17" fill="#305C40"/><circle cx="720" cy="605" r="17" fill="#305C40"/><circle cx="815" cy="470" r="17" fill="#70A674"/><circle cx="815" cy="565" r="17" fill="#70A674"/>
+  <path d="m642 470 61-35m-61 35 61 50m-61 45 61-45m-61 45 61 40m34-170 61 35m-61 50 61-50m-61 50 61 45m-61 40 61-40" stroke="#8FB38B" stroke-width="3"/>
+  <rect x="1030" y="432" width="190" height="175" rx="18" fill="#D1E8C9"/><path d="m1070 540 35-35 24 19 46-53" stroke="#3B7047" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="235" y="655" fill="#55745B" font-family="monospace" font-size="16">DATA</text><text x="690" y="655" fill="#55745B" font-family="monospace" font-size="16">MODEL</text><text x="1075" y="655" fill="#55745B" font-family="monospace" font-size="16">PREDICTION</text><text x="110" y="790" font-family="monospace" font-size="15" fill="#55745B" letter-spacing="3">CURIOSITY IS A GOOD PLACE TO START.</text>
+</svg>

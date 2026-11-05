@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" fill="none">
+  <defs><pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#4D6756" fill-opacity=".5"/></pattern></defs>
+  <path fill="#152B21" d="M0 0h1400v900H0z"/><path fill="url(#dots)" d="M0 0h1400v900H0z"/>
+  <circle cx="1260" cy="80" r="350" fill="#1C3628"/><circle cx="100" cy="850" r="270" fill="#1C3628"/>
+  <text x="110" y="150" font-family="monospace" font-size="16" letter-spacing="5" fill="#A4C68E">A SMALL LOOP FOR BIG IDEAS</text>
+  <text x="106" y="250" font-family="Arial,sans-serif" font-size="66" font-weight="700" letter-spacing="-2" fill="#E4EFDB">One step. Then the next.</text>
+  <path d="M390 490h95m420 0h95M1140 605v100H260V605" stroke="#658859" stroke-width="3" stroke-dasharray="9 9"/><path d="m472 480 14 10-14 10m515-20 14 10-14 10m-725 128-10-14-10 14" stroke="#A4C68E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="110" y="375" width="300" height="230" rx="20" fill="#244332" stroke="#446044"/><rect x="550" y="375" width="300" height="230" rx="20" fill="#C2E6A6"/><rect x="990" y="375" width="300" height="230" rx="20" fill="#244332" stroke="#446044"/>
+  <text x="140" y="423" font-family="monospace" font-size="14" fill="#A4C68E">01 / ASK A QUESTION</text><text x="580" y="423" font-family="monospace" font-size="14" fill="#35532B">02 / TRY SOMETHING</text><text x="1020" y="423" font-family="monospace" font-size="14" fill="#A4C68E">03 / KEEP THE LESSON</text>
+  <text x="140" y="548" font-family="Arial,sans-serif" font-size="45" font-weight="600" fill="#E4EFDB">Explore.</text><text x="580" y="548" font-family="Arial,sans-serif" font-size="45" font-weight="600" fill="#1C3829">Build.</text><text x="1020" y="548" font-family="Arial,sans-serif" font-size="45" font-weight="600" fill="#E4EFDB">Reflect.</text>
+  <circle cx="355" cy="462" r="20" stroke="#A4C68E" stroke-width="3"/><path d="m371 478 16 16m350-43-14 14 14 14m34-28 14 14-14 14m-11-36-10 44m-516-3 15 15 33-35" stroke="#35532B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m1218 450 13 13 25-27" stroke="#A4C68E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="525" y="770" font-family="monospace" font-size="14" fill="#A4C68E" letter-spacing="2">REPEAT WITH A LITTLE MORE CLARITY.</text>
+</svg>

@@ -1,8 +1,9 @@
+import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -11,10 +12,15 @@ const navLinks = [
   { name: "Projects", href: "#projects" },
   { name: "Experience", href: "#experience" },
   { name: "Education", href: "#education" },
+  { name: "Field Notes", href: "#blog" },
   { name: "Contact", href: "#contact" },
 ];
 
 export function Navbar() {
+  const [location] = useLocation();
+  const [open, setOpen] = useState(false);
+  const hrefFor = (href: string) => href.startsWith("#") && location !== "/" ? "/" + href : href;
+  const active = (href: string) => activeSection === href;
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("#home");
 
@@ -28,6 +34,7 @@ export function Navbar() {
 
   useEffect(() => {
     const observers = navLinks.map((link) => {
+      if (!link.href.startsWith("#") || location !== "/") return null;
       const element = document.querySelector(link.href);
       if (!element) return null;
 
@@ -49,13 +56,15 @@ export function Navbar() {
         if (obs) obs.observer.unobserve(obs.element);
       });
     };
-  }, []);
+  }, [location]);
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setOpen(false);
+    if (!href.startsWith("#") || location !== "/") return;
     e.preventDefault();
     const element = document.querySelector(href);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      element.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     }
   };
 
@@ -71,7 +80,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
             <a
-              href="#home"
+              href={hrefFor("#home")}
               onClick={(e) => handleScrollTo(e, "#home")}
               className="text-xl font-bold tracking-tighter text-primary"
             >
@@ -80,13 +89,14 @@ export function Navbar() {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1 relative bg-muted/40 p-1 rounded-full border border-border/40">
+          <nav className="hidden xl:flex items-center gap-1 relative bg-muted/40 p-1 rounded-full border border-border/40">
             {navLinks.map((link) => {
-              const isActive = activeSection === link.href;
+              const isActive = active(link.href);
               return (
                 <a
                   key={link.name}
-                  href={link.href}
+                  href={hrefFor(link.href)}
+                  aria-current={active(link.href) ? "location" : undefined}
                   onClick={(e) => handleScrollTo(e, link.href)}
                   className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors duration-300 select-none ${
                     isActive ? "text-primary-foreground z-10" : "text-muted-foreground hover:text-foreground"
@@ -106,8 +116,8 @@ export function Navbar() {
           </nav>
 
           {/* Mobile Nav */}
-          <div className="flex items-center gap-4 md:hidden">
-            <Sheet>
+          <div className="flex items-center gap-4 xl:hidden">
+            <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <Button 
                   variant="outline" 
@@ -119,11 +129,12 @@ export function Navbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
-                <nav className="flex flex-col gap-4 mt-8">
+                <SheetTitle className="sr-only">Portfolio navigation</SheetTitle><SheetDescription className="sr-only">Explore the portfolio and Field Notes articles.</SheetDescription>
+                <nav className="flex flex-col gap-2 mt-8 max-h-[80dvh] overflow-y-auto">
                   {navLinks.map((link) => (
                     <a
                       key={link.name}
-                      href={link.href}
+                      href={hrefFor(link.href)}
                       onClick={(e) => handleScrollTo(e, link.href)}
                       className={`text-lg font-medium py-2 px-4 rounded-xl transition-colors ${
                         activeSection === link.href
