@@ -1,5 +1,7 @@
 # React + TypeScript + Vite
 
+For Field Notes / Article Studio, see [BLOG_GUIDE.md](./BLOG_GUIDE.md). Run `npm.cmd run dev:netlify` and open `http://localhost:8888/#blog` to use the portfolio with local Functions and persistent local storage.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

@@ -9,9 +9,7 @@ export type MediumArticle = {
   isSample?: boolean;
 };
 
-// Replace these samples with your own Medium articles.
-// Put thumbnails in public/blog-images/ and reference /blog-images/filename.jpg.
-// Set a real mediumUrl and isSample: false to enable the article link.
+// First-use sample content. Article Studio persists subsequent edits in Netlify Blobs.
 export const articles: MediumArticle[] = [
   {
     id: "idea-to-app",

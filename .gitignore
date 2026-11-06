@@ -1,2 +1,6 @@
 node_modules/
 .env
+.netlify/
+.studio-test/
+test-results/
+*.tsbuildinfo

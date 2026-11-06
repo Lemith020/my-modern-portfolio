@@ -1,9 +1,21 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, BookOpen } from "lucide-react";
-import { articles } from "@/data/articles";
+import type { MediumArticle } from "@/data/articles";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArticleStudio } from "@/components/ArticleStudio";
+import { studioRequest } from "@/lib/article-studio-api";
+import { Button } from "@/components/ui/button";
 
 export function BlogArticles() {
   const reduceMotion = useReducedMotion();
+  const queryClient = useQueryClient();
+  const listing = useQuery({
+    queryKey: ["field-notes"],
+    queryFn: () => studioRequest<{ articles: MediumArticle[] }>("public"),
+    staleTime: 0,
+    retry: 1,
+  });
+  const articles = listing.data?.articles ?? [];
 
   return (
     <section id="blog" className="py-24 bg-background transition-colors duration-500 scroll-mt-16" aria-labelledby="field-notes-heading">
@@ -13,6 +25,8 @@ export function BlogArticles() {
           <div className="w-12 h-1 bg-primary rounded-full" />
           <p className="mt-4 text-muted-foreground text-sm leading-relaxed">Thoughts on code, AI, and the things I learn along the way. Written on Medium.</p>
         </div>
+        {listing.isPending && <p role="status" className="mb-6 text-sm text-muted-foreground">Loading Field Notes…</p>}
+        {listing.isError && <div role="alert" className="mb-6 flex flex-wrap items-center gap-3"><p className="text-sm text-muted-foreground">Field Notes could not be refreshed.</p><Button variant="outline" onClick={() => { void listing.refetch(); }}>Retry</Button></div>}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((article, index) => {
             const hasLink = !article.isSample && /^https:\/\//i.test(article.mediumUrl);
@@ -38,6 +52,7 @@ export function BlogArticles() {
             );
           })}
         </div>
+        <ArticleStudio onChanged={() => { void queryClient.invalidateQueries({ queryKey: ["field-notes"] }); }} />
       </div>
     </section>
   );

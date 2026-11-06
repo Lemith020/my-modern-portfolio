@@ -1,7 +1,7 @@
 # Article thumbnails
 
-Put Medium article card images in this folder.
+This folder contains the original public sample illustrations.
 
-Example: public/blog-images/my-article.jpg is referenced in src/data/articles.ts as /blog-images/my-article.jpg.
+Upload new article covers through Article Studio. They are saved in Netlify Blobs and do not require repository changes.
 
-Use short lowercase filenames with hyphens. These images are public. See BLOG_GUIDE.md at the project root for the card template. The three supplied SVG illustrations are used for the mock cards.
+See BLOG_GUIDE.md at the project root for local setup and publishing instructions. The three supplied SVG illustrations remain public and are used for the sample cards.
