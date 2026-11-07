@@ -8,6 +8,7 @@ import type { PinVerifier } from "./studio-auth.ts";
 import type { StudioStore } from "./studio-store.ts";
 import { createProjectService } from "./project-service.ts";
 import { HttpError } from "./studio-http.ts";
+import { createCertificateService } from "./certificate-service.ts";
 
 type Catalog = { articles: StudioArticle[] };
 type Session = { expiresAt: number };
@@ -96,6 +97,7 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
   const verifier = options.verifier ?? productionVerifier;
   const secureCookies = options.secureCookies ?? true;
   const projects = createProjectService(store, now);
+  const certificates = createCertificateService(store, now);
 
   async function requireSession(request: Request) {
     const token = readToken(request);
@@ -142,6 +144,8 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
       }
 
       if (resource === "projects-public" && request.method === "GET") return json(await projects.publicProjects());
+      if (resource === "certificates-public" && request.method === "GET") return json(await certificates.publicCertificates());
+      if (resource === "certificates-public-cover" && request.method === "GET") return await certificateImage(url, true);
       if (resource === "projects-public-cover" && request.method === "GET") {
         const key = url.searchParams.get("key") ?? "";
         const saved = await projects.catalog();
@@ -163,6 +167,10 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
       }
 
       const session = await requireSession(request);
+      if (resource === "certificates" && request.method === "GET") return json(await certificates.catalog());
+      if (resource === "certificates-migrate" && request.method === "POST") return json(await certificates.migrate());
+      if (resource === "certificates-save" && request.method === "POST") return json(await certificates.save(await body(request)));
+      if (resource === "certificates-cover" && request.method === "GET") return await certificateImage(url, false);
       if (resource === "projects" && request.method === "GET") return json(await projects.catalog());
       if (resource === "projects-migrate" && request.method === "POST") return json(await projects.migrate());
       if (resource === "projects-save" && request.method === "POST") return json(await projects.save(await body(request)));
@@ -177,12 +185,12 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
         if (!COVER_KEY.test(key)) throw new HttpError(404, "Cover not found.");
         return await coverResponse(key, resource === "projects-cover" ? "projects/" : "");
       }
-      if ((resource === "upload" || resource === "projects-upload") && request.method === "POST") {
+      if (["upload", "projects-upload", "certificates-upload"].includes(resource) && request.method === "POST") {
         const data = await bytes(request, MAX_COVER_BYTES);
         const type = imageType(data);
         if (!type || request.headers.get("content-type") !== type.mime) throw new HttpError(415, "Choose a PNG, JPEG, or WebP image (up to 3 MB).");
         const key = `${randomUUID()}.${type.extension}`;
-        const prefix = resource === "projects-upload" ? "projects/" : "";
+        const prefix = resource === "certificates-upload" ? "certificates/" : resource === "projects-upload" ? "projects/" : "";
         // New keys keep the previously saved cover intact when a later save fails.
         await store.writeBytes(`${prefix}images/${key}`, data.buffer as ArrayBuffer);
         await store.write(`${prefix}covers/${key}`, { type: type.mime, size: data.length });
@@ -237,5 +245,10 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
     const data = await store.readBytes(`${prefix}images/${key}`);
     if (!data) throw new HttpError(404, "Cover not found.");
     return new Response(data, { headers: { ...responseHeaders, "Content-Type": meta.data.type, "Content-Security-Policy": "default-src 'none'; sandbox" } });
+  }
+
+  async function certificateImage(url: URL, publicAccess: boolean) {
+    const image = await certificates.image(url.searchParams.get("key") ?? "", url.searchParams.get("id"), publicAccess);
+    return new Response(image.data, { headers: { ...responseHeaders, "Content-Type": image.type, "Content-Security-Policy": "default-src 'none'; sandbox" } });
   }
 }

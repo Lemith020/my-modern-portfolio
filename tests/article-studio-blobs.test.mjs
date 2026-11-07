@@ -48,6 +48,12 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     const projectResponse = await call("projects-save", { id: "persisted-project", revision: null, coverKey: projectKey, title: "My Money", description: "Persistent mobile app", category: "Mobile Apps", tech: ["Java", "XML", "SQLite"], github: "", demo: "", action: "publish" });
     assert.equal(projectResponse.status, 200);
     const { project } = await projectResponse.json();
+    assert.equal((await call("certificates-migrate", {})).status, 200);
+    const certificateUpload = await call("certificates-upload", undefined, png);
+    const certificateKey = (await certificateUpload.json()).key;
+    const certificateResponse = await call("certificates-save", { id: "persisted-certificate", revision: null, title: "Cloud Training", issuer: "Academy", issueDate: "", description: "Persistent certificate", coverKey: certificateKey, link: "", action: "publish" });
+    assert.equal(certificateResponse.status, 200);
+    const { certificate } = await certificateResponse.json();
     service = createStudioService(createBlobStore("studio-integration-test", true), { verifier: testVerifier });
     const signedInCookie = cookie;
     cookie = "";
@@ -57,6 +63,10 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     const projectCover = await call(`projects-public-cover&id=${project.id}&key=${projectKey}`);
     assert.equal(projectCover.status, 200);
     assert.deepEqual(Buffer.from(await projectCover.arrayBuffer()), png);
+    assert.equal((await (await call("certificates-public")).json()).certificates[0].title, "Cloud Training");
+    const certificateCover = await call(`certificates-public-cover&id=${certificate.id}&key=${certificateKey}`);
+    assert.equal(certificateCover.status, 200);
+    assert.deepEqual(Buffer.from(await certificateCover.arrayBuffer()), png);
     const cover = await call(`public-cover&id=${article.id}&key=${key}`);
     assert.equal(cover.status, 200);
     assert.deepEqual(Buffer.from(await cover.arrayBuffer()), png);
@@ -71,6 +81,8 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     assert.equal((await call("projects-migrate", {})).status, 200);
     assert.equal((await (await call("projects-public")).json()).projects.some(p => p.id === project.id), false);
     assert.equal((await call("projects-save", { ...project, action: "publish" })).status, 409);
+    assert.equal((await call("certificates-save", { ...certificate, action: "unpublish" })).status, 200);
+    assert.equal((await call(`certificates-public-cover&id=${certificate.id}&key=${certificateKey}`)).status, 404);
     assert.equal((await call("logout", {})).status, 200);
     assert.equal((await call("articles")).status, 401);
   } finally {

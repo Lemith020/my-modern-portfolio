@@ -8,6 +8,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  included_files = ["netlify/assets/certificates/**"]
 
 [dev]
   command = "npm run dev -- --host 127.0.0.1"

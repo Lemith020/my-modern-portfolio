@@ -22,7 +22,10 @@
     "src/components/ProjectStudio.tsx",
     "src/components/Projects.tsx",
     "src/lib/project-studio-types.ts",
-    "src/data/projects.ts"
+    "src/data/projects.ts",
+    "src/components/CertificateStudio.tsx",
+    "src/components/Certifications.tsx",
+    "src/lib/certificate-studio-types.ts"
   ],
   "references": []
 }

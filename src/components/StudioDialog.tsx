@@ -9,8 +9,8 @@ import { StudioApiError, studioRequest } from "@/lib/article-studio-api";
 const greenButton = "bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl min-h-11";
 const errorText = (error: unknown) => error instanceof Error ? error.message : "Something went wrong. Please retry.";
 
-export function StudioDialog({ title, description, children }: {
-  title: string; description: string;
+export function StudioDialog({ title, description, ownerLabel, children }: {
+  title: string; description: string; ownerLabel?: string;
   children: (props: { onExpired: () => void; onLock: () => Promise<void>; locking: boolean }) => ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -98,7 +98,7 @@ export function StudioDialog({ title, description, children }: {
       <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-500/25 dark:bg-emerald-950/35">
         <div className="flex items-center gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"><LockKeyhole className="h-5 w-5" aria-hidden="true" /></span>
-          <div><h3 className="font-bold text-base">{title}</h3><p className="mt-1 text-sm text-muted-foreground">Owner access{title === "Project Studio" ? " to create, edit, and manage your portfolio projects." : ""}</p></div>
+          <div><h3 className="font-bold text-base">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{ownerLabel ?? (title === "Project Studio" ? "Owner access to create, edit, and manage your portfolio projects." : "Owner access")}</p></div>
         </div>
         <DialogTrigger asChild><Button className={greenButton}>Open Studio</Button></DialogTrigger>
       </div>
