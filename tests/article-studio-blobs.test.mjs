@@ -41,10 +41,16 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     const published = await call("save", input);
     assert.equal(published.status, 200);
     const { article } = await published.json();
+    assert.equal((await call("projects-migrate", {})).status, 200);
+    const projectResponse = await call("projects-save", { id: "persisted-project", revision: null, title: "My Money", description: "Persistent mobile app", category: "Mobile Apps", tech: ["Java", "XML", "SQLite"], github: "", demo: "", action: "publish" });
+    assert.equal(projectResponse.status, 200);
+    const { project } = await projectResponse.json();
     service = createStudioService(createBlobStore("studio-integration-test", true), { verifier: testVerifier });
     const signedInCookie = cookie;
     cookie = "";
     assert.equal((await (await call("public")).json()).articles[0].title, "Persisted card");
+    assert.equal((await (await call("projects-public")).json()).projects[0].title, "My Money");
+    assert.equal((await call("projects")).status, 401);
     const cover = await call(`public-cover&id=${article.id}&key=${key}`);
     assert.equal(cover.status, 200);
     assert.deepEqual(Buffer.from(await cover.arrayBuffer()), png);
@@ -54,6 +60,10 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     assert.equal((await (await call("public")).json()).articles.length, 3);
     assert.equal((await call(`public-cover&id=${article.id}&key=${key}`)).status, 404);
     cookie = signedInCookie;
+    assert.equal((await call("projects-save", { ...project, action: "unpublish" })).status, 200);
+    assert.equal((await call("projects-migrate", {})).status, 200);
+    assert.equal((await (await call("projects-public")).json()).projects.some(p => p.id === project.id), false);
+    assert.equal((await call("projects-save", { ...project, action: "publish" })).status, 409);
     assert.equal((await call("logout", {})).status, 200);
     assert.equal((await call("articles")).status, 401);
   } finally {

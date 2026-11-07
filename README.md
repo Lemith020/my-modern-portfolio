@@ -2,6 +2,8 @@
 
 For Field Notes / Article Studio, see [BLOG_GUIDE.md](./BLOG_GUIDE.md). Run `npm.cmd run dev:netlify` and open `http://localhost:8888/#blog` to use the portfolio with local Functions and persistent local storage.
 
+For Featured Projects / Project Studio, including the one-time import after deployment, see [PROJECT_STUDIO_GUIDE.md](./PROJECT_STUDIO_GUIDE.md).
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Hourglass } from "lucide-react";
 import { FaGithub, FaReact, FaHtml5, FaCss3Alt, FaPhp } from "react-icons/fa";
 import { SiJavascript, SiMongodb, SiExpress, SiNodedotjs, SiMysql, SiPython } from "react-icons/si";
 
-type ProjectCategory = "All" | "Frontend" | "Full Stack" | "AI/ML";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { studioRequest } from "@/lib/article-studio-api";
+import { PROJECT_CATEGORIES } from "@/lib/project-studio-types";
+import type { ProjectCategory, PublicProject } from "@/lib/project-studio-types";
+import { ProjectStudio } from "@/components/ProjectStudio";
 
 const techDetails: Record<string, { icon: React.ReactNode; color: string }> = {
   "React": { icon: <FaReact className="h-3.5 w-3.5" />, color: "text-[#61DAFB] border-[#61DAFB]/30 bg-[#61DAFB]/5" },
@@ -21,65 +26,7 @@ const techDetails: Record<string, { icon: React.ReactNode; color: string }> = {
   "Python": { icon: <SiPython className="h-3.5 w-3.5" />, color: "text-[#3776AB] border-[#3776AB]/30 bg-[#3776AB]/5" },
 };
 
-const projects = [
-  {
-    title: "Task Management System",
-    description: "A MERN stack task management system built to organize, track, and manage daily development tasks efficiently.",
-    category: "Full Stack",
-    tech: ["MongoDB", "Express.js", "React", "Node.js", "HTML", "CSS"],
-    github: "https://github.com/Lemith020/Manage-Task-List",
-    demo: "#"
-  },
-  {
-    title: "Simple Full-Stack Login Page",
-    description: "A secure full-stack login and authentication interface utilizing PHP for server-side logic and MySQL databases managed via XAMPP.",
-    category: "Full Stack",
-    tech: ["PHP", "MySQL", "JavaScript", "HTML", "CSS"],
-    github: "https://github.com/Lemith020/simple-fullstack-login-page",
-    demo: "#"
-  },
-  {
-    title: "Amazon UI Clone",
-    description: "A pixel-perfect frontend replica of the Amazon e-commerce platform homepage to practice responsive web design and layouts.",
-    category: "Frontend",
-    tech: ["HTML", "CSS", "JavaScript"],
-    github: "https://github.com/Lemith020/Amazon-clone.git",
-    demo: "#"
-  },
-  {
-    title: "Classic Snake Game",
-    description: "A retro browser-based interactive grid game built logic-first using vanilla JavaScript and styled with clean CSS.",
-    category: "Frontend",
-    tech: ["JavaScript", "HTML", "CSS"],
-    github: "https://github.com/Lemith020/snake-game.git",
-    demo: "#"
-  },
-  {
-    title: "Weather Application",
-    description: "A real-time weather tracking application fetching current atmospheric updates and presenting them through a modern frontend dynamic UI.",
-    category: "Frontend",
-    tech: ["JavaScript", "HTML", "CSS"],
-    github: "https://github.com/Lemith020/weater-app",
-    demo: "#"
-  },
-  {
-    title: "React Stopwatch",
-    description: "A precision stopwatch component built during a comprehensive core React course to master hooks, rendering cycles, and state management.",
-    category: "Frontend",
-    tech: ["React", "JavaScript", "HTML", "CSS"],
-    github: "https://github.com/Lemith020/React-Course",
-    demo: "#"
-  },
-  {
-    title: "AI/ML Research & Engineering Projects",
-    description: "Intelligent systems, predictive models, and pipeline implementations currently conceptualized and pending for active development.",
-    category: "AI/ML",
-    tech: ["Python"],
-    github: "#",
-    demo: "#",
-    isPending: true
-  }
-];
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -89,7 +36,7 @@ const containerVariants = {
   }
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: { 
     opacity: 1, 
@@ -107,8 +54,11 @@ const cardVariants = {
 };
 
 export function Projects() {
-  const [filter, setFilter] = useState<ProjectCategory>("All");
+  const [filter, setFilter] = useState<ProjectCategory | "All">("All");
 
+  const queryClient = useQueryClient();
+  const listing = useQuery({ queryKey: ["featured-projects"], queryFn: () => studioRequest<{ projects: PublicProject[] }>("projects-public"), staleTime: 0, retry: 1 });
+  const projects = listing.data?.projects ?? [];
   const filteredProjects = projects.filter(p => filter === "All" || p.category === filter);
 
   return (
@@ -120,11 +70,12 @@ export function Projects() {
             <div className="w-12 h-1 bg-primary rounded-full mb-6"></div>
           </div>
           
-          <div className="flex flex-wrap gap-2 bg-background/60 p-1.5 rounded-full border border-border/80 w-max relative backdrop-blur-sm">
-            {(["All", "Frontend", "Full Stack", "AI/ML"] as ProjectCategory[]).map(cat => (
+          <div className="flex flex-wrap gap-2 bg-background/60 p-1.5 rounded-full border border-border/80 max-w-full relative backdrop-blur-sm">
+            {(["All", ...PROJECT_CATEGORIES] as const).map(cat => (
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
+                aria-pressed={filter === cat}
                 className={`px-5 py-2 rounded-full text-sm font-medium relative transition-colors duration-300 ${
                   filter === cat ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -142,6 +93,9 @@ export function Projects() {
           </div>
         </div>
 
+        {listing.isPending && <p role="status" className="mb-6 text-sm text-muted-foreground">Loading projects...</p>}
+        {listing.isError && <div role="alert" className="mb-6 flex flex-wrap items-center gap-3"><p>Projects could not be refreshed.</p><Button variant="outline" onClick={() => { void listing.refetch(); }}>Retry</Button></div>}
+        {listing.isSuccess && !filteredProjects.length && <p className="py-8 text-muted-foreground">No published projects in this category yet.</p>}
         <motion.div 
           layout 
           variants={containerVariants}
@@ -153,7 +107,7 @@ export function Projects() {
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project) => (
               <motion.div
-                key={project.title}
+                key={project.id}
                 layout
                 variants={cardVariants}
                 initial="hidden"
@@ -161,7 +115,7 @@ export function Projects() {
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 whileHover="hover"
                 whileTap="tap"
-                className="group flex flex-col bg-card border border-border/80 rounded-2xl overflow-hidden select-none cursor-pointer will-change-transform"
+                className="group min-w-0 flex flex-col bg-card border border-border/80 rounded-2xl overflow-hidden select-none cursor-pointer will-change-transform"
               >
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-4">
@@ -169,14 +123,14 @@ export function Projects() {
                       {project.category}
                     </Badge>
                     <div className="flex gap-2">
-                      {project.github !== "#" && (
+                      {project.github && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors" asChild>
                           <a href={project.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub Repo"><FaGithub className="h-4 w-4" /></a>
                         </Button>
                       )}
-                      {project.demo !== "#" && (
+                      {project.demo && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors" asChild>
-                          <a href={project.demo} aria-label="Live Demo"><ExternalLink className="h-4 w-4" /></a>
+                          <a href={project.demo} target="_blank" rel="noopener noreferrer" aria-label="Live Demo"><ExternalLink className="h-4 w-4" /></a>
                         </Button>
                       )}
                       {project.isPending && (
@@ -188,10 +142,10 @@ export function Projects() {
                   </div>
                   
                   <div className="flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                    <h3 className="text-xl font-bold mb-2 break-words group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
                       {project.title}
                     </h3>
-                    <p className="text-muted-foreground text-sm flex-1 mb-6 leading-relaxed">
+                    <p className="text-muted-foreground text-sm flex-1 mb-6 leading-relaxed break-words">
                       {project.description}
                     </p>
                   </div>
@@ -216,6 +170,7 @@ export function Projects() {
             ))}
           </AnimatePresence>
         </motion.div>
+        <ProjectStudio onChanged={() => { void queryClient.invalidateQueries({ queryKey: ["featured-projects"] }); }} />
       </div>
     </section>
   );

@@ -2,10 +2,27 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "target": "ES2023",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src/components/ArticleStudio.tsx", "src/components/BlogArticles.tsx", "src/lib/article-studio-*.ts", "netlify/**/*.ts"],
+  "include": [
+    "src/components/ArticleStudio.tsx",
+    "src/components/BlogArticles.tsx",
+    "src/lib/article-studio-*.ts",
+    "netlify/**/*.ts",
+    "src/components/StudioDialog.tsx",
+    "src/components/ProjectStudio.tsx",
+    "src/components/Projects.tsx",
+    "src/lib/project-studio-types.ts",
+    "src/data/projects.ts"
+  ],
   "references": []
 }

@@ -6,6 +6,8 @@ import type { StudioArticle } from "../../src/lib/article-studio-types.ts";
 import { digest, newToken, productionVerifier, readToken, SESSION_MS, sessionCookie, verifyPin } from "./studio-auth.ts";
 import type { PinVerifier } from "./studio-auth.ts";
 import type { StudioStore } from "./studio-store.ts";
+import { createProjectService } from "./project-service.ts";
+import { HttpError } from "./studio-http.ts";
 
 type Catalog = { articles: StudioArticle[] };
 type Session = { expiresAt: number };
@@ -14,11 +16,6 @@ type Options = { verifier?: PinVerifier; now?: () => number; secureCookies?: boo
 const RATE_WINDOW = 15 * 60 * 1000;
 const ID = /^[a-zA-Z0-9-]{1,80}$/;
 const COVER_KEY = /^[a-f0-9-]{36}\.(png|jpg|webp)$/;
-
-class HttpError extends Error {
-  status: number;
-  constructor(status: number, message: string) { super(message); this.status = status; }
-}
 
 const responseHeaders = {
   "Cache-Control": "private, no-store, max-age=0",
@@ -98,6 +95,7 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
   const now = options.now ?? Date.now;
   const verifier = options.verifier ?? productionVerifier;
   const secureCookies = options.secureCookies ?? true;
+  const projects = createProjectService(store, now);
 
   async function requireSession(request: Request) {
     const token = readToken(request);
@@ -143,6 +141,7 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
         return json({ expiresAt }, 200, { "Set-Cookie": sessionCookie(token, secureCookies) });
       }
 
+      if (resource === "projects-public" && request.method === "GET") return json(await projects.publicProjects());
       if (resource === "public" && request.method === "GET") {
         const saved = await catalog();
         return json({ articles: saved.data.articles.filter(a => a.status === "published").map(publicArticle) });
@@ -157,6 +156,9 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
       }
 
       const session = await requireSession(request);
+      if (resource === "projects" && request.method === "GET") return json(await projects.catalog());
+      if (resource === "projects-migrate" && request.method === "POST") return json(await projects.migrate());
+      if (resource === "projects-save" && request.method === "POST") return json(await projects.save(await body(request)));
       if (resource === "session" && request.method === "GET") return json({ expiresAt: session.expiresAt });
       if (resource === "logout" && request.method === "POST") {
         await store.remove(session.key);
@@ -217,7 +219,7 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
     } catch (error) {
       if (error instanceof HttpError) return json({ error: error.message }, error.status, error.status === 429 ? { "Retry-After": "900" } : {});
       // Do not log requests, credentials, tokens, or private article content.
-      return json({ error: "Studio is temporarily unavailable. Please retry. Your previously saved article and cover are safe." }, 503);
+      return json({ error: "Studio is temporarily unavailable. Please retry. Your previously saved content is safe." }, 503);
     }
   };
 

@@ -16,7 +16,7 @@ export async function studioRequest<T>(resource: string, data?: unknown, image?:
       signal: AbortSignal.timeout(30_000),
     });
   } catch {
-    throw new StudioApiError("Could not reach Studio. Check your connection and retry. Your saved article and cover are safe.", 0);
+    throw new StudioApiError("Could not reach Studio. Check your connection and retry. Your saved content is safe.", 0);
   }
   const value = await response.json().catch(() => null);
   if (!response.ok || !value) {
