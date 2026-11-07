@@ -14,6 +14,9 @@ Until import succeeds, the function serves the existing seed cards without writi
 
 ## Storage and editing
 
+- Project images are optional. Use **Project image** to upload a PNG, JPEG, or WebP file up to 3 MB, preview it, or replace/remove it. Save the project to apply the change. Published cards show the image above the title; cards without an image retain their existing layout.
+- Images use `projects/images/` and `projects/covers/` in the same Blobs store, with the Article Studio upload validation and session checks. Draft previews require a session; public image requests require a matching published project. Replaced, removed, and unpublished images stop being served publicly. Failed uploads or saves preserve the previously saved image.
+- Deploy the image feature once. Existing projects need no additional import or migration; subsequent image updates are stored without redeployment.
 - Projects use the separate `projects/catalog-v1` namespace in the existing `article-studio-v1` Blobs store. Articles, covers, sessions, and project records cannot collide. The existing deployment-context suffix isolates preview/development storage from production.
 - Both studios retain `/.netlify/functions/article-studio`, so the existing cookie path and credentials remain unchanged. Project resources are `projects-public` (public GET), `projects` (private GET), `projects-migrate` (private POST), and `projects-save` (private POST). Every private operation requires the existing server session.
 - Stable IDs identify edits regardless of title or category. Record revisions and catalog ETags reject stale or simultaneous writes instead of losing someone else's changes. Retry simultaneous saves; for a stale project, copy your unsaved edits and reopen its latest version.
@@ -39,7 +42,7 @@ npm.cmd run lint
 
 The API tests cover unauthorized draft reads and mutations, shared sessions and expiry/logout, explicit repeatable migration, required fields and URL validation, draft/publish/edit/category-change/unpublish, failed saves, stale revisions, concurrent edits, and storage outages. The local Blobs integration test verifies project and article persistence across service restarts. UI tests exercise all five filters, shared PIN access in both directions, incorrect PIN feedback, form validation, retained edits after failure/expiry, and the Mobile Apps acceptance flow.
 
-Verification completed: 21 Node tests and 9 UI tests pass, including the existing Article Studio flows and contact validation/payload with mocked EmailJS delivery. A local Edge browser check at 1280×960 and 390×844 verified layout, the real HTTP-only cookie flow, import, publishing a Mobile Apps project, logout, signed-out refresh, and filtering. Desktop and mobile screenshots were inspected; the mobile editor scrolls to its actions without horizontal overflow.
+Verification completed: 22 Node tests and 10 UI tests pass, including project image upload/preview/removal, failed-upload/save retries, private image access, persistent image bytes, the existing Article Studio flows, and contact validation/payload with mocked EmailJS delivery. A local Edge browser check at 1280×960 and 390×844 verified layout, the real HTTP-only cookie flow, import, publishing a Mobile Apps project, logout, signed-out refresh, and filtering. Desktop and mobile screenshots were inspected; the mobile editor scrolls to its actions without horizontal overflow.
 
 Studio-specific type checking and linting pass. Repository-wide checks currently fail in untouched code: animation typing in About/Education/Experience, missing dependencies for unused UI components, and existing React refresh/hooks lint violations. These do not block the production Vite build.
 

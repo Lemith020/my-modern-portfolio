@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StudioDialog } from "@/components/StudioDialog";
 import { StudioApiError, studioRequest } from "@/lib/article-studio-api";
+import { MAX_COVER_BYTES, STUDIO_ENDPOINT } from "@/lib/article-studio-types";
 import { PROJECT_CATEGORIES, validProjectUrl } from "@/lib/project-studio-types";
 import type { ProjectCatalog, ProjectFields, StudioProject } from "@/lib/project-studio-types";
 
@@ -100,6 +101,39 @@ function ProjectEditor({ project, onSaved, onBack, onExpired, onBusy, locking }:
   const [tag, setTag] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [coverKey, setCoverKey] = useState(project?.coverKey ?? "");
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState(() => project?.coverKey ? `${STUDIO_ENDPOINT}?resource=projects-cover&key=${encodeURIComponent(project.coverKey)}` : "");
+  const [progress, setProgress] = useState("");
+  const objectUrl = useRef<string | null>(null);
+  const uploaded = useRef<{ file: File; key: string } | null>(null);
+  const imageInput = useRef<HTMLInputElement>(null);
+  useEffect(() => () => { if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); }, []);
+
+  function chooseImage(next?: File) {
+    if (!next) return;
+    if (!["image/png", "image/jpeg", "image/webp"].includes(next.type) || next.size > MAX_COVER_BYTES) {
+      setError("Choose a PNG, JPEG, or WebP image (up to 3 MB).");
+      if (imageInput.current) imageInput.current.value = "";
+      return;
+    }
+    if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+    objectUrl.current = URL.createObjectURL(next);
+    setFile(next);
+    setPreview(objectUrl.current);
+    setError("");
+  }
+
+  function removeImage() {
+    if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+    objectUrl.current = null;
+    uploaded.current = null;
+    if (imageInput.current) imageInput.current.value = "";
+    setFile(null);
+    setPreview("");
+    setCoverKey("");
+    setError("");
+  }
 
   function addTag() {
     const value = tag.trim();
@@ -119,7 +153,17 @@ function ProjectEditor({ project, onSaved, onBack, onExpired, onBusy, locking }:
     setBusy(true);
     onBusy(true);
     try {
-      const result = await studioRequest<{ project: StudioProject }>("projects-save", { ...fields, tech, id, revision: project?.revision ?? null, action });
+      let savedCoverKey = coverKey;
+      if (file && action !== "unpublish") {
+        if (uploaded.current?.file !== file) {
+          setProgress("Uploading image...");
+          const result = await studioRequest<{ key: string }>("projects-upload", undefined, file);
+          uploaded.current = { file, key: result.key };
+        }
+        savedCoverKey = uploaded.current.key;
+      }
+      setProgress("Saving...");
+      const result = await studioRequest<{ project: StudioProject }>("projects-save", { ...fields, tech, coverKey: savedCoverKey, id, revision: project?.revision ?? null, action });
       onSaved(result.project);
     } catch (err) {
       setError(errorText(err));
@@ -143,6 +187,15 @@ function ProjectEditor({ project, onSaved, onBack, onExpired, onBusy, locking }:
       <div className="space-y-2"><Label htmlFor="project-title">Project name</Label><Input id="project-title" maxLength={160} {...field("title")} /></div>
       <div className="space-y-2"><Label htmlFor="project-description">Description</Label><Textarea id="project-description" rows={4} maxLength={2000} {...field("description")} /></div>
       <div className="space-y-2">
+        <Label htmlFor="project-image">Project image (optional)</Label>
+        <Input ref={imageInput} id="project-image" type="file" accept="image/png,image/jpeg,image/webp" className="h-auto py-2" aria-describedby="project-image-help" onChange={event => chooseImage(event.target.files?.[0])} />
+        <p id="project-image-help" className="text-xs text-muted-foreground">PNG, JPEG, or WebP · Up to 3 MB. A wide image works best.</p>
+        {preview && <>
+          <img src={preview} alt="Project image preview" className="aspect-video w-full max-h-56 rounded-xl border border-border object-cover" />
+          <Button type="button" variant="outline" onClick={removeImage}>Remove image</Button>
+        </>}
+      </div>
+      <div className="space-y-2">
         <Label htmlFor="project-tech">Technologies</Label>
         <div className="flex flex-wrap gap-2 rounded-xl border border-border p-3">
           {fields.tech.map(technology => <span key={technology} className="inline-flex max-w-full items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-sm"><span className="break-all">{technology}</span><button type="button" className="rounded p-1 hover:bg-background focus-visible:outline-2 focus-visible:outline-primary" aria-label={`Remove ${technology}`} onClick={() => setFields(current => ({ ...current, tech: current.tech.filter(t => t !== technology) }))}><X className="h-3.5 w-3.5" /></button></span>)}
@@ -159,7 +212,7 @@ function ProjectEditor({ project, onSaved, onBack, onExpired, onBusy, locking }:
       {project?.status !== "published" && <Button type="button" variant="outline" disabled={busy || locking} onClick={() => { void save("draft"); }}>Save draft</Button>}
       <Button type="submit" className={greenButton} disabled={busy || locking}>{project?.status === "published" ? "Save changes" : "Publish project"}</Button>
       {project?.status === "published" && <Button type="button" variant="outline" disabled={busy || locking} onClick={() => { void save("unpublish"); }}>Unpublish</Button>}
-      {busy && <span role="status" className="text-sm text-muted-foreground">Saving...</span>}
+      {busy && <span role="status" className="text-sm text-muted-foreground">{progress || "Saving..."}</span>}
     </div>
   </form>;
 }

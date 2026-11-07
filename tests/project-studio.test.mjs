@@ -4,15 +4,15 @@ import { createStudioService } from "../netlify/lib/studio-service.ts";
 import { PROJECT_CATALOG_KEY } from "../netlify/lib/project-service.ts";
 import { initialProjects } from "../src/data/projects.ts";
 import { SESSION_MS } from "../netlify/lib/studio-auth.ts";
-import { MemoryStore, TEST_PIN, testVerifier } from "./helpers/studio-fixture.mjs";
+import { MemoryStore, TEST_PIN, testVerifier, png } from "./helpers/studio-fixture.mjs";
 
 function fixture() {
   const store = new MemoryStore();
   let time = Date.now();
   const service = createStudioService(store, { verifier: testVerifier, now: () => time });
   let cookie = "";
-  const call = (resource, data, signedIn = true, origin = "https://portfolio.test") => service(new Request(`https://portfolio.test/.netlify/functions/article-studio?resource=${resource}`, {
-    method: data === undefined ? "GET" : "POST", headers: { Cookie: signedIn ? cookie : "", Origin: origin, "Content-Type": "application/json" }, body: data === undefined ? undefined : JSON.stringify(data),
+  const call = (resource, data, signedIn = true, origin = "https://portfolio.test", raw, mime = "image/png") => service(new Request(`https://portfolio.test/.netlify/functions/article-studio?resource=${resource}`, {
+    method: data === undefined && raw === undefined ? "GET" : "POST", headers: { Cookie: signedIn ? cookie : "", Origin: origin, "Content-Type": raw === undefined ? "application/json" : mime }, body: raw ?? (data === undefined ? undefined : JSON.stringify(data)),
   }));
   const login = async () => { const r = await call("login", { pin: TEST_PIN }); assert.equal(r.status, 200); cookie = r.headers.get("set-cookie").split(";")[0]; };
   const list = async () => (await (await call("projects-public", undefined, false)).json()).projects;
@@ -20,6 +20,59 @@ function fixture() {
   return { store, call, login, list, save, advance: ms => { time += ms; } };
 }
 const input = (extra = {}) => ({ id: "my-money", revision: null, title: "My Money", description: "Track spending and budgets.", category: "Mobile Apps", tech: ["Java", "XML", "SQLite"], github: "", demo: "", action: "draft", ...extra });
+
+test("project images remain private until published; failed replacements, removal, and unpublish preserve access rules", async () => {
+  const f = fixture();
+  const upload = (resource = "projects-upload", raw = png, mime = "image/png", signedIn = true) => f.call(resource, undefined, signedIn, "https://portfolio.test", raw, mime);
+  assert.equal((await upload()).status, 401);
+  assert.equal((await f.call("projects-cover&key=secret")).status, 401);
+  await f.login(); await f.call("projects-migrate", {});
+  for (const [data, mime] of [[Buffer.from("not an image"), "image/png"], [png, "image/jpeg"], [Buffer.from("<svg/>"), "image/svg+xml"]]) assert.equal((await upload("projects-upload", data, mime)).status, 415);
+  assert.equal((await upload("projects-upload", Buffer.alloc(3 * 1024 * 1024 + 1))).status, 413);
+  const articleKey = (await (await upload("upload")).json()).key;
+  assert.equal((await f.call("projects-save", input({ coverKey: articleKey }))).status, 400);
+  assert.equal((await f.call("projects-save", input({ coverKey: "../covers/secret" }))).status, 400);
+  const first = await upload(); assert.equal(first.status, 201);
+  const { key } = await first.json();
+  assert.equal(f.store.entries.has(`projects/images/${key}`), true);
+  assert.equal((await f.call(`cover&key=${key}`)).status, 404);
+  assert.equal((await f.call(`projects-cover&key=${key}`, undefined, false)).status, 401);
+  assert.equal((await f.call(`projects-cover&key=${key}`)).status, 200);
+  const url = `projects-public-cover&id=my-money&key=${key}`;
+  let project = await f.save(input({ coverKey: key }));
+  assert.equal((await f.call(url, undefined, false)).status, 404);
+  project = await f.save({ ...project, action: "publish" });
+  assert.match((await f.list())[0].image, /resource=projects-public-cover/);
+  assert.equal("coverKey" in (await f.list())[0], false);
+  const image = await f.call(url, undefined, false);
+  assert.equal(image.status, 200);
+  assert.equal(image.headers.get("content-type"), "image/png");
+  assert.match(image.headers.get("cache-control"), /no-store/);
+  assert.deepEqual(Buffer.from(await image.arrayBuffer()), png);
+  f.store.fail = "upload";
+  assert.equal((await upload()).status, 503);
+  f.store.fail = null;
+  const replacement = (await (await upload()).json()).key;
+  f.store.fail = `write:${PROJECT_CATALOG_KEY}`;
+  assert.equal((await f.call("projects-save", { ...project, coverKey: replacement, action: "publish" })).status, 503);
+  assert.equal((await f.call(url, undefined, false)).status, 200);
+  f.store.fail = null;
+  project = await f.save({ ...project, coverKey: replacement, action: "publish" });
+  assert.equal((await f.call(url, undefined, false)).status, 404);
+  const replacementUrl = `projects-public-cover&id=my-money&key=${replacement}`;
+  assert.equal((await f.call(replacementUrl, undefined, false)).status, 200);
+  project = await f.save({ ...project, coverKey: undefined, title: "Old client edit", action: "publish" });
+  assert.equal(project.coverKey, replacement);
+  project = await f.save({ ...project, action: "unpublish" });
+  assert.equal((await f.call(replacementUrl, undefined, false)).status, 404);
+  assert.equal((await f.call(`projects-cover&key=${replacement}`)).status, 200);
+  project = await f.save({ ...project, coverKey: "", action: "publish" });
+  assert.equal(project.coverKey, "");
+  assert.equal("image" in (await f.list())[0], false);
+  assert.equal((await f.call(replacementUrl, undefined, false)).status, 404);
+  await f.call("logout", {});
+  assert.equal((await f.call(`projects-cover&key=${replacement}`)).status, 401);
+});
 
 test("shared session protects every project operation, expires, and is revoked for both studios", async () => {
   const f = fixture();

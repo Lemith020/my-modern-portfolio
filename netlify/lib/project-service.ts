@@ -4,6 +4,7 @@ import { PROJECT_CATEGORIES, validProjectUrl } from "../../src/lib/project-studi
 import type { ProjectCategory, ProjectCatalog, StudioProject } from "../../src/lib/project-studio-types.ts";
 import type { StudioStore } from "./studio-store.ts";
 import { HttpError } from "./studio-http.ts";
+import { STUDIO_ENDPOINT } from "../../src/lib/article-studio-types.ts";
 
 export const PROJECT_CATALOG_KEY = "projects/catalog-v1";
 export function initialProjectCatalog(): ProjectCatalog {
@@ -21,6 +22,7 @@ export function createProjectService(store: StudioStore, now: () => number) {
       return { projects: (await catalog()).data.projects.filter(p => p.status === "published").map(p => ({
         id: p.id, title: p.title, category: p.category, description: p.description,
         tech: p.tech, github: p.github, demo: p.demo, ...(p.isPending ? { isPending: true } : {}),
+        ...(p.coverKey ? { image: `${STUDIO_ENDPOINT}?resource=projects-public-cover&id=${encodeURIComponent(p.id)}&key=${encodeURIComponent(p.coverKey)}` } : {}),
       })) };
     },
     async migrate() {
@@ -41,6 +43,9 @@ export function createProjectService(store: StudioStore, now: () => number) {
         if (!previous) throw new HttpError(404, "Project not found.");
         project = { ...previous, status: "draft" };
       } else {
+        // Older clients and records can omit the optional cover without removing it.
+        const coverKey = data.coverKey === undefined ? previous?.coverKey ?? "" : data.coverKey;
+        if (typeof coverKey !== "string" || (coverKey && (!/^[a-f0-9-]{36}\.(png|jpg|webp)$/.test(coverKey) || !await store.read(`projects/covers/${coverKey}`)))) throw new HttpError(400, "Upload the project image again before saving.");
         const fields: Record<string, string> = {};
         for (const [field, max] of Object.entries({ title: 160, description: 2000, category: 40, github: 2048, demo: 2048 })) {
           if (typeof data[field] !== "string" || data[field].length > max) throw new HttpError(400, `Check the ${field} field (maximum ${max} characters).`);
@@ -56,6 +61,7 @@ export function createProjectService(store: StudioStore, now: () => number) {
           id: data.id, title: fields.title, description: fields.description, category: fields.category as ProjectCategory | "",
           tech: [...new Set((data.tech as string[]).map(t => t.trim()).filter(Boolean))], github: fields.github, demo: fields.demo,
           status: data.action === "publish" ? "published" : "draft", revision: "", updatedAt: "",
+          coverKey,
           ...(previous?.isPending ? { isPending: true } : {}),
         };
       }

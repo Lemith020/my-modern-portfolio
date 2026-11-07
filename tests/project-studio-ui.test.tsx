@@ -7,7 +7,7 @@ import { BlogArticles } from "../src/components/BlogArticles";
 import { createStudioService } from "../netlify/lib/studio-service";
 import { PROJECT_CATALOG_KEY } from "../netlify/lib/project-service";
 import { SESSION_MS } from "../netlify/lib/studio-auth";
-import { MemoryStore, TEST_PIN, testVerifier } from "./helpers/studio-fixture.mjs";
+import { MemoryStore, TEST_PIN, testVerifier, png } from "./helpers/studio-fixture.mjs";
 import type { ReactNode } from "react";
 
 vi.mock("framer-motion", () => ({
@@ -28,9 +28,22 @@ beforeEach(() => {
   let cookie = "";
   vi.stubGlobal("fetch", async (input: string, init: RequestInit = {}) => {
     if (unavailable) throw new TypeError("Offline");
-    const response = await service(new Request(`https://portfolio.test${input}`, { method: init.method, body: init.body, headers: { ...init.headers, Origin: "https://portfolio.test", Cookie: cookie } }), "project-ui-test");
+    let body = init.body;
+    if (body instanceof File) {
+      body = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(body as File);
+      });
+    }
+    const response = await service(new Request(`https://portfolio.test${input}`, { method: init.method, body, headers: { ...init.headers, Origin: "https://portfolio.test", Cookie: cookie } }), "project-ui-test");
     if (response.headers.has("set-cookie")) cookie = response.headers.get("set-cookie")!.split(";")[0];
     return response;
+  });
+  vi.stubGlobal("URL", class extends URL {
+    static createObjectURL() { return "blob:project-preview"; }
+    static revokeObjectURL() {}
   });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   render(<QueryClientProvider client={client}><Projects /><BlogArticles /></QueryClientProvider>);
@@ -50,6 +63,39 @@ async function prepare(user: User) {
   await user.click(await screen.findByRole("button", { name: "Import existing projects" }));
   await screen.findByText(/Existing projects imported/);
 }
+
+test("project image preview, failed upload/save retries, public card and image removal", async () => {
+  const user = userEvent.setup(); await prepare(user);
+  await user.click(screen.getByRole("button", { name: "Edit Task Management System" }));
+  const image = new File([new Uint8Array(png)], "project.png", { type: "image/png" });
+  await user.upload(screen.getByLabelText("Project image (optional)"), image);
+  expect(screen.getByAltText("Project image preview").getAttribute("src")).toBe("blob:project-preview");
+  store.fail = "upload";
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  await screen.findByText(/Your form is still here/);
+  expect(screen.getByAltText("Project image preview")).toBeTruthy();
+  store.fail = `write:${PROJECT_CATALOG_KEY}`;
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  await screen.findByText(/Your form is still here/);
+  await waitFor(() => expect((screen.getByRole("button", { name: "Save changes" }) as HTMLButtonElement).disabled).toBe(false));
+  expect([...store.entries.keys()].filter(key => key.startsWith("projects/images/"))).toHaveLength(1);
+  store.fail = null;
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  await screen.findByText("Published. Your project is now in Featured Projects.");
+  expect([...store.entries.keys()].filter(key => key.startsWith("projects/images/"))).toHaveLength(1);
+  await user.keyboard("{Escape}");
+  const cardImage = await screen.findByAltText("Task Management System preview");
+  expect(cardImage.getAttribute("src")).toContain("resource=projects-public-cover");
+  await open(user);
+  await user.click(await screen.findByRole("button", { name: "Edit Task Management System" }));
+  expect(screen.getByAltText("Project image preview").getAttribute("src")).toContain("resource=projects-cover");
+  await user.click(screen.getByRole("button", { name: "Remove image" }));
+  expect(screen.queryByAltText("Project image preview")).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Save changes" }));
+  await screen.findByText("Published. Your project is now in Featured Projects.");
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(screen.queryByAltText("Task Management System preview")).toBeNull());
+});
 
 test("Mobile Apps acceptance flow: draft, tags, publish, public filters, category edit and unpublish", async () => {
   const user = userEvent.setup(); await prepare(user);

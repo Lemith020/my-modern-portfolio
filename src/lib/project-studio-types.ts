@@ -8,8 +8,9 @@ export type ProjectFields = {
   github: string;
   demo: string;
 };
-export type PublicProject = ProjectFields & { id: string; isPending?: boolean };
+export type PublicProject = ProjectFields & { id: string; isPending?: boolean; image?: string };
 export type StudioProject = PublicProject & {
+  coverKey?: string;
   status: "draft" | "published";
   revision: string;
   updatedAt: string;

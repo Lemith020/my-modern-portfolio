@@ -117,6 +117,9 @@ export function Projects() {
                 whileTap="tap"
                 className="group min-w-0 flex flex-col bg-card border border-border/80 rounded-2xl overflow-hidden select-none cursor-pointer will-change-transform"
               >
+                {project.image && <div className="aspect-video w-full overflow-hidden bg-muted border-b border-border/50">
+                  <img src={project.image} alt={`${project.title} preview`} width={1400} height={788} loading="lazy" className="h-full w-full object-cover" />
+                </div>}
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <Badge variant="outline" className="border-emerald-500/20 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">

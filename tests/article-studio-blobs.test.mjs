@@ -42,7 +42,10 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     assert.equal(published.status, 200);
     const { article } = await published.json();
     assert.equal((await call("projects-migrate", {})).status, 200);
-    const projectResponse = await call("projects-save", { id: "persisted-project", revision: null, title: "My Money", description: "Persistent mobile app", category: "Mobile Apps", tech: ["Java", "XML", "SQLite"], github: "", demo: "", action: "publish" });
+    const projectUpload = await call("projects-upload", undefined, png);
+    assert.equal(projectUpload.status, 201);
+    const projectKey = (await projectUpload.json()).key;
+    const projectResponse = await call("projects-save", { id: "persisted-project", revision: null, coverKey: projectKey, title: "My Money", description: "Persistent mobile app", category: "Mobile Apps", tech: ["Java", "XML", "SQLite"], github: "", demo: "", action: "publish" });
     assert.equal(projectResponse.status, 200);
     const { project } = await projectResponse.json();
     service = createStudioService(createBlobStore("studio-integration-test", true), { verifier: testVerifier });
@@ -51,6 +54,9 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     assert.equal((await (await call("public")).json()).articles[0].title, "Persisted card");
     assert.equal((await (await call("projects-public")).json()).projects[0].title, "My Money");
     assert.equal((await call("projects")).status, 401);
+    const projectCover = await call(`projects-public-cover&id=${project.id}&key=${projectKey}`);
+    assert.equal(projectCover.status, 200);
+    assert.deepEqual(Buffer.from(await projectCover.arrayBuffer()), png);
     const cover = await call(`public-cover&id=${article.id}&key=${key}`);
     assert.equal(cover.status, 200);
     assert.deepEqual(Buffer.from(await cover.arrayBuffer()), png);
@@ -61,6 +67,7 @@ test("Netlify Blobs adapter persists cards/covers across service restarts and re
     assert.equal((await call(`public-cover&id=${article.id}&key=${key}`)).status, 404);
     cookie = signedInCookie;
     assert.equal((await call("projects-save", { ...project, action: "unpublish" })).status, 200);
+    assert.equal((await call(`projects-public-cover&id=${project.id}&key=${projectKey}`)).status, 404);
     assert.equal((await call("projects-migrate", {})).status, 200);
     assert.equal((await (await call("projects-public")).json()).projects.some(p => p.id === project.id), false);
     assert.equal((await call("projects-save", { ...project, action: "publish" })).status, 409);

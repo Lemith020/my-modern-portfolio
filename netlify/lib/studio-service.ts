@@ -142,6 +142,13 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
       }
 
       if (resource === "projects-public" && request.method === "GET") return json(await projects.publicProjects());
+      if (resource === "projects-public-cover" && request.method === "GET") {
+        const key = url.searchParams.get("key") ?? "";
+        const saved = await projects.catalog();
+        const published = saved.projects.find(p => p.id === url.searchParams.get("id") && p.status === "published" && p.coverKey === key);
+        if (!COVER_KEY.test(key) || !published) throw new HttpError(404, "Cover not found.");
+        return await coverResponse(key, "projects/");
+      }
       if (resource === "public" && request.method === "GET") {
         const saved = await catalog();
         return json({ articles: saved.data.articles.filter(a => a.status === "published").map(publicArticle) });
@@ -165,19 +172,20 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
         return json({ ok: true }, 200, { "Set-Cookie": sessionCookie("", secureCookies, 0) });
       }
       if (resource === "articles" && request.method === "GET") return json((await catalog()).data);
-      if (resource === "cover" && request.method === "GET") {
+      if ((resource === "cover" || resource === "projects-cover") && request.method === "GET") {
         const key = url.searchParams.get("key") ?? "";
         if (!COVER_KEY.test(key)) throw new HttpError(404, "Cover not found.");
-        return await coverResponse(key);
+        return await coverResponse(key, resource === "projects-cover" ? "projects/" : "");
       }
-      if (resource === "upload" && request.method === "POST") {
+      if ((resource === "upload" || resource === "projects-upload") && request.method === "POST") {
         const data = await bytes(request, MAX_COVER_BYTES);
         const type = imageType(data);
         if (!type || request.headers.get("content-type") !== type.mime) throw new HttpError(415, "Choose a PNG, JPEG, or WebP image (up to 3 MB).");
         const key = `${randomUUID()}.${type.extension}`;
+        const prefix = resource === "projects-upload" ? "projects/" : "";
         // New keys keep the previously saved cover intact when a later save fails.
-        await store.writeBytes(`images/${key}`, data.buffer as ArrayBuffer);
-        await store.write(`covers/${key}`, { type: type.mime, size: data.length });
+        await store.writeBytes(`${prefix}images/${key}`, data.buffer as ArrayBuffer);
+        await store.write(`${prefix}covers/${key}`, { type: type.mime, size: data.length });
         return json({ key }, 201);
       }
       if (resource === "save" && request.method === "POST") {
@@ -223,10 +231,10 @@ export function createStudioService(store: StudioStore, options: Options = {}) {
     }
   };
 
-  async function coverResponse(key: string) {
-    const meta = await store.read<Cover>(`covers/${key}`);
+  async function coverResponse(key: string, prefix = "") {
+    const meta = await store.read<Cover>(`${prefix}covers/${key}`);
     if (!meta) throw new HttpError(404, "Cover not found.");
-    const data = await store.readBytes(`images/${key}`);
+    const data = await store.readBytes(`${prefix}images/${key}`);
     if (!data) throw new HttpError(404, "Cover not found.");
     return new Response(data, { headers: { ...responseHeaders, "Content-Type": meta.data.type, "Content-Security-Policy": "default-src 'none'; sandbox" } });
   }
